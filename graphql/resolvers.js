@@ -77,8 +77,11 @@ const resolvers = {
             const user = await User.signup(username, password)
             return user
         },
-        createPost: {
-            
+        createPost: async(obj , { data } ,context) =>{
+            //const res = context.user
+            const res = await Post.createPost( data ,context.user)
+            //console.log(res)
+            return res
         }
         // createPost : 
         // args.data.
