@@ -1,0 +1,39 @@
+type Tag {
+    name: String
+    posts: [Post]
+}
+
+type Post {
+    id: ID!
+    title: String
+    tags: [Tag]
+    content: String
+    author: User
+}
+
+type User {
+    id: ID!
+    username: String
+    posts:[Post]
+}
+
+type Query {
+    posts(tag: String , tags: [String]) : [Post]
+    post(id: ID!):Post
+    #client send ID not null
+    users: [User]
+    me: User
+}
+
+input PostData {
+    title: String
+    content: String
+    tags: [String]
+}
+
+type Mutation {
+    #Return auth token
+    login(username: String!, password: String!): String
+    signup(username: String!, password: String!): String
+    createPost(data: PostData!) : Post
+}
