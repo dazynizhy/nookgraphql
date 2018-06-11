@@ -77,6 +77,9 @@ const resolvers = {
             const user = await User.signup(username, password)
             return user
         },
+        createPost: {
+            
+        }
         // createPost : 
         // args.data.
     }
