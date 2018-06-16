@@ -16,6 +16,7 @@ const userLoader = new DataLoader( async (keys)=>{
         })
         return matchRow
     })
+    //debug qeury user once becuse cash function
     console.log(rows)
     console.log(results.map(user => user.username))
     return results
