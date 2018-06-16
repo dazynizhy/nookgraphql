@@ -1,4 +1,42 @@
 const { Post,User } = require('../models')
+const DataLoader = require('dataloader')
+
+const userLoader = new DataLoader( async (keys)=>{
+    const rows = await User.find({
+        _id:{ $in : keys}
+    })
+    const results = keys.map((key) => {
+        // return rows.find((row) =>{
+        //     //console.log('row._id', row._id.toString(), typeof row._id )
+        //     //console.log(key)
+        //     return row._id.toString() === key
+        // })
+        const matchRow = rows.find((row) => {
+            return `${row._id}` === `${key}`
+        })
+        return matchRow
+    })
+    console.log(rows)
+    console.log(results.map(user => user.username))
+    return results
+
+},{
+    cacheKeyFn: (key) => `${key}`
+})
+
+const postsByUserIdLoader = new DataLoader( async (userIds) =>{
+    const rows = await Post.find({
+        authorId: { $in : userIds}
+    })
+    const results = userIds.map((userId) => {
+        const matchRow = rows.filter((row) => {
+            return `${row.authorId}` === `${userId}`
+        })
+        return matchRow
+    })
+    return results
+   
+},{ cacheKeyFn: (key) => `${key}`})
 
 // const resolvers = {   
 //     Post: {
@@ -26,7 +64,8 @@ const resolvers = {
     Post: {
         id: (post) => { return post._id},
         author: async (post) =>{
-            const user = await User.findById(post.authorId)
+            //const user = await User.findById(post.authorId)
+            const user = await userLoader.load(`${post.authorId}`)//post.authorId
             return user
         },
         tags: (post) => {
@@ -38,7 +77,8 @@ const resolvers = {
     User: {
         id: (user) => { return user._id },
         posts: async (user) =>{
-            const posts = await Post.find({ authorId: user._id })
+            //const posts = await Post.find({ authorId: user._id })
+            const posts = await postsByUserIdLoader.load(user._id)//user._id
             return posts
         }
     },
