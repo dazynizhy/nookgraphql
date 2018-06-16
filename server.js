@@ -4,6 +4,8 @@ const mongoose = require('mongoose')
 const bodyParsor = require('Body-parser')
 const { Post,User } = require('./models')
 const { authMiddleware } = require('./lib/auth')
+const DataLoader = require('dataloader')
+const { createUserLoader,createPostsByUserIdLoader } = require('./loaders')
 
 const morgan = require('morgan')
 // app.get('/hello', (req,res) => {
@@ -47,10 +49,17 @@ app.use(morgan('dev'))
 //     }
 // }))
 app.use(authMiddleware)
+
+
 app.use('/graphql', graphqlExpress((req, res) =>{
+   
     return {
         schema: schema,
         context: {
+            loaders:{
+                userLoader : createUserLoader(),
+                postsByUserIdLoader : createPostsByUserIdLoader()
+            },
             user: req.user
         }
     }
