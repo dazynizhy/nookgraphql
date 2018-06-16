@@ -13,7 +13,7 @@ const postSchema = mongoose.Schema({
 postSchema.statics.createPost = async function(data ,user) {
     //console.log(data)
     //console.log(user)
-    if(typeof user == "undefined"){
+    if(typeof user === "undefined"){
         const e = new Error(`undefined data user token`)
         e.name = 'empty token'
         throw e

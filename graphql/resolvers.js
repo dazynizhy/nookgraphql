@@ -37,7 +37,7 @@ const postsByUserIdLoader = new DataLoader( async (userIds) =>{
     })
     return results
    
-},{ cacheKeyFn: (key) => `${key}`})
+},{ cacheKeyFn: (userId) => `${userId}`})
 
 // const resolvers = {   
 //     Post: {
