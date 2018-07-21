@@ -35,6 +35,10 @@ const {graphqlExpress , graphiqlExpress} = require('apollo-server-express')
 const graphqlHTTP = require('express-graphql')
 const schema = require('./schema')
 
+const { SubscriptionServer } =  require('subscriptions-transport-ws')
+const http = require('http')
+const { execute , subscribe } = require('graphql')
+
 app.use(cors())
 //call postRoute.js **[bodyParsor]**
 app.use(bodyParsor.json())
@@ -68,7 +72,8 @@ app.use('/graphql', graphqlExpress((req, res) =>{
 }))
 
 app.use('/graphiql', graphiqlExpress({
-    endpointURL: '/graphql'
+    endpointURL: '/graphql',
+    subscriptionsEndpoint : 'ws://localhost:3000/subscriptions'
 }))
 //end graphql apollo-server
 
@@ -150,7 +155,20 @@ app.post('/me', authMiddleware,  (req,res) =>{
 //     graphiql : true
 // }))
 
+const server = http.createServer(app)
 
-app.listen(3000,()=> {
+server.listen(3000,()=> {
     console.log('listen on port 3000')
+    new SubscriptionServer({
+        schema,
+        execute,
+        subscribe
+    },{
+        server,
+        path: '/subscriptions'
+    })
 })
+
+// app.listen(3000,()=> {
+//     console.log('listen on port 3000')
+// })

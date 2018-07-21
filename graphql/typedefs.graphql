@@ -22,7 +22,8 @@ type Query {
     post(id: ID!):Post
     #client send ID not null
     users: [User]
-    me: User
+    me: User,
+    hello: String
 }
 
 input PostData {
@@ -37,3 +38,11 @@ type Mutation {
     signup(username: String!, password: String!): String
     createPost(data: PostData!) : Post
 }
+
+# yarn add graphl-subscriptions
+type Subscription {
+    helloQueried: String,
+    postCreated(tag: String ): Post
+
+}
+

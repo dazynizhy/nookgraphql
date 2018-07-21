@@ -1,6 +1,8 @@
 const { Post,User } = require('../models')
 const DataLoader = require('dataloader')
 
+const { PubSub , withFilter } = require('graphql-subscriptions')
+const pubsub = new PubSub()
 // const resolvers = {   
 //     Post: {
 //         id: post => post._id,
@@ -69,6 +71,11 @@ const resolvers = {
         } ,
         me: async (obj, args, context) => {
             return context.user
+        },
+        hello: () =>{
+            pubsub.publish
+            ('HELLO_QUERIED')
+            return 'Hello World'
         }
     },
     Mutation: {
@@ -84,10 +91,45 @@ const resolvers = {
             //const res = context.user
             const res = await Post.createPost( data ,context.user)
             //console.log(res)
+
+            pubsub.publish('POST_CREATED',{
+                id: res.id,
+                tags: res.tags
+            })
+
             return res
-        }
+        },
         // createPost : 
         // args.data.
+       
+    },
+    Subscription: {
+        helloQueried: {
+            subscribe: () => {
+                return pubsub.asyncIterator
+                ('HELLO_QUERIED')
+            },
+            resolve: () => {
+                return `${new Date()}`
+            }
+        },
+        postCreated : {
+            // subscribe: () => {
+            //     return pubsub.asyncIterator
+            //     ('POST_CREATED')
+            // },
+            subscribe: withFilter(() => pubsub.asyncIterator('POST_CREATED')
+            , (payload, args) => {
+                if(!args.tag) {
+                    return true
+                }
+                return payload.tags.includes(args.tag)
+            }),
+            resolve: async (payload) => {
+                const post = await Post.findById(payload.id)
+                return post 
+            }
+        }
     }
 }
 
